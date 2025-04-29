@@ -43,11 +43,9 @@ LSTM cocok untuk data time series karena memiliki memori jangka panjang yang mem
 - Melakukan perbandingan performa antara KNN, Regresi Linier, dan LSTM berdasarkan metrik evaluasi (MAE, RMSE, dan R2 Score). Ini dilakukan untuk memilih model yang paling optimal dan layak digunakan dalam implementasi nyata. Ini dilakukan untuk memilih model yang paling optimal dan layak digunakan dalam implementasi nyata.
 
 ## Data Understanding
-Dataset yang digunakan dalam proyek ini merupakan data historis harga saham perusahaan teknologi Nvidia (NVDA), yang diperoleh dari situs Investing.com. Dataset ini berisi informasi harian mengenai harga saham Nvidia selama periode tertentu, dan digunakan sebagai dasar untuk membangun model prediksi harga saham. Data dapat diunduh melalui tautan berikut:
-https://www.investing.com/equities/nvidia-corp-historical-data
+Dataset yang digunakan dalam proyek ini merupakan data historis harga saham perusahaan teknologi Nvidia (NVDA), yang diperoleh dari situs Investing.com. Dataset ini berisi informasi harian mengenai harga saham Nvidia selama periode tertentu, dan digunakan sebagai dasar untuk membangun model prediksi harga saham. Data dapat diunduh melalui tautan berikut (https://www.investing.com/equities/nvidia-corp-historical-data). Jumlah Dataset terdiri dari 1.256 baris dan 7 kolom. Kondisi data, tidak ditemukan nilai kosong pada seluruh kolom. Dan tidak ditemukan data duplikat.
 
-### Variabel-variabel pada Restaurant UCI dataset adalah sebagai berikut:
-Dataset memiliki sejumlah variabel yang relevan untuk analisis dan pemodelan, antara lain:
+### Variabel-variabel pada NVIDIA Corporation (NVDA) dataset adalah sebagai berikut:
 - Date: Tanggal pencatatan harga saham.
 - Price: Harga penutupan (closing price) saham Nvidia pada tanggal tersebut.
 - Open: Harga pembukaan saham pada awal perdagangan hari tersebut.
@@ -59,59 +57,57 @@ Dataset memiliki sejumlah variabel yang relevan untuk analisis dan pemodelan, an
 Semua fitur tersebut bersifat numerik, kecuali tanggal. Dan sangat penting untuk dianalisis secara visual maupun statistik sebelum digunakan dalam pemodelan.
 
 Untuk memahami karakteristik data secara lebih mendalam, dilakukan beberapa tahapan Exploratory Data Analysis, antara lain:
-- Visualisasi Tren Harga Saham (Price) dari Waktu ke Waktu. Tujuannya untuk melihat pola umum seperti tren naik atau turun, serta fluktuasi harga harian. Visualisasi ini membantu dalam memahami perilaku harga saham dalam periode waktu tertentu, yang penting untuk analisis prediktif selanjutnya.
-- Distribusi Volume Perdagangan Saham (Volume). Digunakan untuk mengetahui periode dengan aktivitas perdagangan tinggi atau rendah. Dengan mengetahui distribusi volume, kita bisa memahami kapan saham tersebut lebih banyak diperdagangkan dan apakah ada hubungan antara volume dan harga saham.
-- Korelasi Antar Variabel seperti Price, Open, High, Low. Dilakukan untuk memahami hubungan antar fitur dan memastikan relevansi terhadap target prediksi. Korelasi antar variabel memberikan wawasan mengenai bagaimana masing-masing fitur saling terkait, yang bisa menjadi pertimbangan penting dalam pemilihan fitur yang digunakan untuk membangun model prediksi.
-- Pembersihan Data (Data Cleaning). Melakukan pembersihan data dengan menghapus simbol seperti “K” atau “M” pada volume dan mengubahnya menjadi angka numerik yang dapat diolah oleh model. Selain itu, kolom tanggal juga dikonversi menjadi format datetime agar lebih mudah digunakan dalam analisis dan pemodelan berbasis waktu.
-
-Hasil dari tahap ini memberikan dasar yang kuat dalam memahami konteks data mengidentifikasi potensi masalah yang perlu diperbaiki, dan memastikan data siap digunakan dalam proses persiapan dan pemodelan lebih lanjut.
+- Visualisasi Tren Harga Saham (Price) dari Waktu ke Waktu.
+![image](https://github.com/user-attachments/assets/2b2ea3db-3f1a-4771-98e1-4e28385bdf7d)
+Visualisasi tren Price dari waktu ke waktu memperlihatkan fluktuasi yang signifikan dan tren pertumbuhan jangka panjang. Pola ini memperlihatkan adanya periode tertentu dengan kenaikan atau penurunan harga saham secara konsisten, yang relevan untuk pendekatan prediktif pada model.
+- Visualisasi Heatmap Korelasi Antar Fitur
+![image](https://github.com/user-attachments/assets/f87b117c-8877-4996-8f3e-f9175f3633c7)
+Visualisasi heatmap menunjukkan korelasi sangat kuat antara fitur Price, Open, High, dan Low, yang semuanya memiliki nilai korelasi mendekati 1. Hal ini menunjukkan bahwa pergerakan harga dalam dataset ini konsisten antar fitur tersebut. Sementara itu, Volume memiliki korelasi negatif lemah dengan fitur harga, yang berarti peningkatan volume perdagangan tidak selalu diikuti oleh kenaikan harga. Fitur Change % menunjukkan hubungan yang sangat lemah terhadap semua fitur lainnya, mengindikasikan bahwa persentase perubahan harga harian tidak banyak dipengaruhi oleh harga maupun volume.
 
 ## Data Preparation
-Pada bagian ini, dilakukan beberapa tahapan persiapan data yang bertujuan untuk memastikan data siap digunakan dalam pemodelan. Tahapan-tahapan ini berfokus pada pembersihan data, pemrosesan, dan transformasi data agar dapat digunakan secara efektif oleh model prediksi. Proses ini sangat penting untuk memastikan bahwa model dapat menghasilkan hasil yang akurat.
+Pada tahap ini, dilakukan serangkaian proses untuk mempersiapkan data sebelum digunakan dalam pemodelan. Teknik data preparation berikut diterapkan secara berurutan:
 
 **Langkah-langkah Data Preparation**:
-- Pembersihan Data (Data Cleaning)
-  - Menghapus Simbol pada Kolom Volume. Pada kolom Volume, terdapat simbol “K” dan “M” yang menunjukkan ribuan dan jutaan. Simbol-simbol ini perlu dihapus dan diubah menjadi angka numerik agar bisa diproses oleh model. Misalnya, “100K” diubah menjadi 100,000 dan “2M” menjadi 2,000,000.
-  - Mengonversi Kolom Tanggal ke Format DateTime: Kolom tanggal perlu diubah menjadi format datetime yang sesuai agar analisis berbasis waktu dapat dilakukan dengan baik. Proses ini memungkinkan kita untuk memanfaatkan fungsi-fungsi manipulasi waktu dalam analisis dan pemodelan.
+- Konversi Kolom Tanggal
+Kolom Date dikonversi ke dalam format datetime. Format datetime diperlukan agar data dapat diurutkan berdasarkan waktu dan dianalisis.Pembersihan Data (Data Cleaning)
+- Pembersihan Format Kolom Volume
+Kolom Vol awalnya berisi simbol seperti “K” dan “M” (contoh: “5.2M”, “300K”). Data ini dibersihkan dan dikonversi ke nilai numerik. Simbol non-numerik tidak dapat diproses oleh model machine learning. Konversi ke tipe numerik memungkinkan analisis statistik dan proses pelatihan model.
 
-- Normalisasi Data (Feature Scaling)
-  - Menggunakan MinMaxScaler pada Harga Saham. Karena data harga saham memiliki rentang nilai yang besar, dilakukan normalisasi dengan menggunakan MinMaxScaler. Normalisasi ini memastikan bahwa harga saham diubah menjadi skala antara 0 dan 1, yang akan mempercepat konvergensi model dan meningkatkan akurasi prediksi, terutama untuk model berbasis gradient descent seperti LSTM.
-
-- Membagi Data Menjadi Training dan Testing Set
-  - Pemisahan Data Berdasarkan Waktu. Data dibagi menjadi dua set, yaitu data untuk pelatihan (training) dan pengujian (testing). Pemisahan ini dilakukan dengan memilih data dari masa lalu untuk melatih model dan data yang lebih baru untuk menguji hasil prediksi. Hal ini penting untuk memastikan bahwa model diuji pada data yang belum pernah dilihat sebelumnya dan dapat menghasilkan prediksi yang realistis.
-
-- Membuat Dataset untuk Model LSTM (Time Series Dataset)
-  - Membuat Dataset Time Series. Untuk model LSTM, dibutuhkan dataset dengan format time series. Dataset ini dibuat dengan menggunakan fungsi create_dataset, yang mengonversi data harga saham menjadi urutan waktu (time steps) yang akan digunakan untuk melatih model. Setiap titik data akan memprediksi harga saham berdasarkan sejumlah langkah waktu sebelumnya.
+Tahapan-tahapan tersebut dilakukan untuk memastikan bahwa data terstruktur dan sesuai untuk digunakan dalam pemodelan prediktif, khususnya pada konteks time-series forecasting untuk harga saham NVIDIA.
  
 ## Modeling
-Tahapan modeling adalah langkah di mana kita menerapkan algoritma machine learning untuk membangun model yang dapat digunakan untuk memprediksi harga saham Nvidia berdasarkan data historis. Pada proyek ini, kita menggunakan tiga model utama: KNN Regression, Linear Regression, dan LSTM (Long Short-Term Memory) untuk memprediksi harga saham. Setiap model memiliki karakteristik, kelebihan, dan kekurangan tersendiri, yang akan dibahas lebih lanjut.
+Tahapan modeling merupakan proses di mana algoritma machine learning diterapkan untuk membangun model prediktif berdasarkan data historis harga saham Nvidia. Dalam proyek ini, kami menggunakan tiga pendekatan model utama: KNN Regression, Linear Regression, dan LSTM (Long Short-Term Memory). Masing-masing model memiliki kelebihan dan keterbatasan, serta digunakan dengan parameter yang disesuaikan untuk mencapai performa terbaik.
 
 1. KNN (K-Nearest Neighbors)
-KNN adalah salah satu algoritma machine learning yang digunakan untuk regresi dan klasifikasi. Dalam KNN, prediksi harga saham dilakukan berdasarkan data historis dengan mencari K tetangga terdekat yang memiliki nilai fitur yang serupa. Prediksi dilakukan dengan cara menghitung rata-rata nilai target dari tetangga terdekat tersebut.
-- Kelebihan KNN, Mudah Dimengerti karena KNN adalah algoritma yang intuitif dan mudah dipahami, serta tidak memerlukan pelatihan model yang rumit. KNN tidak mengasumsikan bentuk distribusi data, yang membuatnya fleksibel untuk berbagai jenis data.
-- Kekurangan KNN, Kecepatan Prediksi Lambat karena KNN memerlukan perhitungan jarak antar data untuk setiap prediksi, sehingga bisa sangat lambat pada dataset besar. Rentan terhadap Data Noise, KNN bisa sangat terpengaruh oleh data noise, karena prediksi bergantung pada tetangga terdekat yang mungkin saja mengandung nilai yang tidak relevan.
+KNN digunakan untuk memprediksi harga saham dengan cara mengidentifikasi sejumlah K tetangga terdekat berdasarkan kemiripan fitur, lalu menghitung rata-rata nilai target dari tetangga-tetangga tersebut.
+- Kelebihan KNN yaitu; sederhana dan mudah dipahami, tidak memerlukan pelatihan model eksplisit, dan tidak mengasumsikan bentuk distribusi data tertentu.
+- Kekurangan KNN yaitu; proses prediksi lambat pada dataset besar karena menghitung jarak setiap kali prediksi dilakukan dan rentan terhadap noise dalam data.
 - Parameter:
-  - n_neighbors, Menentukan jumlah tetangga terdekat yang digunakan dalam prediksi.
-  - weights, Fungsi bobot yang digunakan untuk menghitung kontribusi tetangga terdekat, bisa berupa 'uniform' atau 'distance'.
+  - n_neighbors=5: Menggunakan 5 tetangga terdekat dalam prediksi.
+  - weights='distance': Memberikan bobot lebih besar pada tetangga yang lebih dekat.
+  - algorithm='auto': Memilih algoritma pencarian tetangga terbaik secara otomatis.
 
 2. Linear Regression
-Linear Regression adalah model regresi yang berusaha mencari hubungan linier antara variabel independen dan variabel dependen. Model ini digunakan untuk memprediksi harga saham dengan mengasumsikan hubungan linier antara harga saham dan fitur yang relevan.
-- Kelebihan Linear Regression, Sederhana dan Cepat karena model ini mudah diimplementasikan dan cepat dalam proses pelatihan serta prediksi. Hasil model linear mudah untuk dipahami, yaitu hubungan antara input dan output dalam bentuk koefisien.
-- Kekurangan Linear Regression, Linear regression mengasumsikan bahwa hubungan antara variabel independen dan dependen adalah linier. Jika hubungan tersebut non-linear, model ini tidak akan bekerja dengan baik. Outliers dapat sangat mempengaruhi kinerja model karena linear regression sangat dipengaruhi oleh data yang ekstrem.
+Linear Regression digunakan untuk memodelkan hubungan linier antara variabel input dan harga saham. Model ini diasumsikan bekerja baik jika terdapat korelasi linier dalam data.
+- Kelebihan Linear Regression yaitu; proses pelatihan cepat dan efisien dan interpretasi model mudah (berbasis koefisien).
+- Kekurangan Linear Regression yaitu; tidak cocok untuk data dengan pola non-linier dan sangat terpengaruh oleh outlier.
 - Parameter:
-  - fit_intercept, Menentukan apakah model akan mempelajari intercept atau tidak.
-  - normalize, Menentukan apakah fitur akan dinormalisasi sebelum model dibangun.
+  - fit_intercept=True: Model mempelajari nilai intersep.
+  - normalize=False: Tidak dilakukan normalisasi fitur karena preprocessing dilakukan sebelumnya.
+  - Implementasi menggunakan sklearn.linear_model.LinearRegression.
 
 3. LSTM (Long Short-Term Memory)
-LSTM adalah tipe dari Recurrent Neural Networks (RNN) yang dirancang untuk menangani data urutan, seperti time series. LSTM memanfaatkan memori jangka panjang untuk mengingat informasi yang relevan dalam urutan data dan dapat menangani ketergantungan jangka panjang.
-- Kelebihan LSTM Cocok untuk Time Series. LSTM sangat baik dalam menangani data time series, di mana urutan data dan ketergantungan waktu sangat penting. LSTM mampu mengingat informasi dalam waktu yang lama, sehingga cocok untuk memprediksi data yang bergantung pada pola-pola sebelumnya.
-- Kekurangan LSTM:
-Kompleksitas dan Waktu Pelatihan, LSTM membutuhkan waktu pelatihan yang lebih lama dibandingkan dengan algoritma lainnya seperti KNN dan Linear Regression. Jika tidak dilakukan regularisasi dengan benar, LSTM dapat dengan mudah mengalami overfitting terutama pada dataset kecil.
+LSTM merupakan jenis jaringan saraf tiruan (neural network) yang dirancang untuk data sequential, seperti time series. Model ini sangat sesuai untuk memprediksi harga saham berdasarkan urutan waktu karena kemampuannya untuk mengingat pola historis jangka panjang.
+- Kelebihan LSTM yaitu; mampu menangkap ketergantungan waktu dalam data danocok untuk data time series yang kompleks.
+- Kekurangan LSTM yaitu; struktur model kompleks dan pelatihan memakan waktu lama dan risiko overfitting, terutama pada dataset kecil jika tidak dilakukan regularisasi.
 - Parameter:
-  - units, Jumlah unit dalam layer LSTM yang mempengaruhi kemampuan memori model.
-  - batch_size: Jumlah sampel yang digunakan dalam setiap iterasi pelatihan.
-  - epochs: Jumlah iterasi di mana model dilatih pada seluruh dataset.
-  - dropout: Persentase neuron yang akan "dimatikan" selama pelatihan untuk mencegah overfitting.
+  - units=50: Jumlah neuron dalam layer LSTM.
+  - batch_size=32: Jumlah data per iterasi pelatihan.
+  - epochs=100: Jumlah iterasi pelatihan pada seluruh dataset.
+  - dropout=0.2: Menonaktifkan 20% neuron secara acak selama pelatihan untuk mencegah overfitting.
+  - optimizer='adam': Optimizer yang digunakan untuk mempercepat konvergensi.
+  - loss='mean_squared_error': Fungsi loss yang digunakan untuk menghitung kesalahan prediksi.
+  - Model diimplementasikan menggunakan TensorFlow/Keras
 
 ## Evaluation
 Evaluasi model merupakan tahap penting untuk mengukur seberapa baik model dalam melakukan prediksi berdasarkan data historis harga saham Nvidia. Dalam proyek ini metrik evaluasi yang digunakan adalah:
