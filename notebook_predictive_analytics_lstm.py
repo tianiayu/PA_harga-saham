@@ -98,14 +98,7 @@ sns.heatmap(df.corr(numeric_only=True), annot=True, cmap='coolwarm')
 plt.title('Heatmap Korelasi')
 plt.show()
 
-"""Heatmap korelasi antar fitur numerik untuk mengetahui hubungan antar variabel seperti Price, Open, High, Low, dan Vol. Korelasi tinggi dapat digunakan sebagai insight untuk pemodelan."""
-
-plt.figure(figsize=(10, 5))
-sns.scatterplot(x='Vol.', y='Price', data=df)
-plt.title('Volume vs Harga')
-plt.show()
-
-"""Plot scatter yang menunjukkan hubungan antara Volume dan Price. Ini bisa memberikan gambaran apakah volume transaksi memiliki pengaruh terhadap harga saham.
+"""Heatmap korelasi antar fitur numerik untuk mengetahui hubungan antar variabel seperti Price, Open, High, Low, dan Vol. Korelasi tinggi dapat digunakan sebagai insight untuk pemodelan.
 
 ## Modeling (KNN)
 """
