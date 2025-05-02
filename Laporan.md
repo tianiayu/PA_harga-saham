@@ -72,8 +72,12 @@ Pada tahap ini, dilakukan serangkaian proses untuk mempersiapkan data sebelum di
 Kolom Date dikonversi ke dalam format datetime. Format datetime diperlukan agar data dapat diurutkan berdasarkan waktu dan dianalisis.Pembersihan Data (Data Cleaning)
 - Pembersihan Format Kolom Volume
 Kolom Vol awalnya berisi simbol seperti “K” dan “M” (contoh: “5.2M”, “300K”). Data ini dibersihkan dan dikonversi ke nilai numerik. Simbol non-numerik tidak dapat diproses oleh model machine learning. Konversi ke tipe numerik memungkinkan analisis statistik dan proses pelatihan model.
+- Pemilihan Fitur dan Target
+Setelah data dibersihkan, proses dilanjutkan dengan pemisahan fitur (independen variabel) dan target (dependent variabel). Fitur yang digunakan untuk pelatihan model adalah kolom: Open, High, Low, dan Vol., sedangkan target yang ingin diprediksi adalah Price.
+- Normalisasi Fitur
+Karena model seperti KNN dan beberapa algoritma lain sensitif terhadap skala fitur, maka dilakukan normalisasi fitur menggunakan Min-Max Scaler untuk mengubah skala data ke rentang 0 hingga 1. Ini memastikan setiap fitur memiliki kontribusi yang setara dalam proses pelatihan model.
 
-Tahapan-tahapan tersebut dilakukan untuk memastikan bahwa data terstruktur dan sesuai untuk digunakan dalam pemodelan prediktif, khususnya pada konteks time-series forecasting untuk harga saham NVIDIA.
+Tahapan-tahapan tersebut dilakukan untuk memastikan bahwa data terstruktur dan sesuai untuk digunakan dalam pemodelan prediktif, khususnya pada konteks time-series forecasting untuk harga saham NVIDIA. Langkah-langkah ini sangat penting agar model dapat dilatih dengan data yang valid dan akurat.
  
 ## Modeling
 Tahapan modeling merupakan proses di mana algoritma machine learning diterapkan untuk membangun model prediktif berdasarkan data historis harga saham Nvidia. Dalam proyek ini, kami menggunakan tiga pendekatan model utama: KNN Regression, Linear Regression, dan LSTM (Long Short-Term Memory). Masing-masing model memiliki kelebihan dan keterbatasan, serta digunakan dengan parameter yang disesuaikan untuk mencapai performa terbaik.
